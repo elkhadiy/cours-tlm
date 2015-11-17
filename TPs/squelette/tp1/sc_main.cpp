@@ -20,7 +20,7 @@ int sc_main(int, char**)
 	gen1.initiator.bind(bus.target);
 	bus.initiator.bind(mem.target);
 
-	bus.map(mem.target, MEM_BASE, MEM_BASE+MEM_SIZE);
+	bus.map(mem.target, MEM_BASE, MEM_SIZE);
 
 	sc_start(); return 0;
 }
