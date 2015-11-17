@@ -29,14 +29,35 @@ void Generator::generate(void)
 
 		if (status != tlm::TLM_OK_RESPONSE)
 		{
-			cout	<< "Failed writing "
-					<< val << " @" << addr 
+			cout	<< FG_RED << "[" << name() << "] \t" << FG_DEFAULT
+					<< "Failed writing "
+					<< val << FG_YELLOW << " @" << addr << FG_DEFAULT
 					<< std::endl;
 		}
 
 		addr += sizeof(ensitlm::data_t);
 		val = rand() % 1000 + 1;
 
-		wait(10, SC_NS);
+	}
+
+	addr = MEM_BASE;
+	
+	for (int i = 0; i < NB_TEST_WRITES; i++)
+	{
+		status = initiator.read(addr, val);
+
+		if (status != tlm::TLM_OK_RESPONSE)
+		{
+			cout	<<  FG_RED << "[" << name() << "] \t" << FG_DEFAULT
+					<< "Failed reading @" << addr << FG_DEFAULT
+					<< endl;
+		} else {
+			cout	<< FG_RED << "[" << name() << "] \t" << FG_DEFAULT
+					<< FG_YELLOW << "@" << std::hex << addr << FG_DEFAULT
+					<< ": " << std::dec << val
+					<< endl; 
+		}
+
+		addr += sizeof(ensitlm::data_t);
 	}
 }
