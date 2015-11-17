@@ -15,7 +15,7 @@ int sc_main(int, char**)
 	 */
 	Generator	gen1("Generator1");
 	Bus			bus("Bus");
-	Memory		mem("Memory", 10);
+	Memory		mem("Memory", 4*10-4);
 
 	gen1.initiator.bind(bus.target);
 	bus.initiator.bind(mem.target);

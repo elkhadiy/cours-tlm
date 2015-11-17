@@ -30,8 +30,8 @@ void Generator::generate(void)
 		if (status != tlm::TLM_OK_RESPONSE)
 		{
 			cout	<< FG_RED << "[" << name() << "] \t" << FG_DEFAULT
-					<< "Failed writing "
-					<< val << FG_YELLOW << " @" << addr << FG_DEFAULT
+					<< "Failed writing " << std::dec
+					<< val << FG_YELLOW << " @" << std::hex << addr << FG_DEFAULT
 					<< std::endl;
 		}
 

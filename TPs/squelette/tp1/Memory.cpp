@@ -2,11 +2,11 @@
 #include <new>
 #include "defines.h"
 
-Memory::Memory(sc_module_name name, int size)
+Memory::Memory(sc_module_name name, uint32_t size)
 	: sc_module(name)
 {
 	this->size = size;
-	storage = new (std::nothrow) ensitlm::data_t [size];
+	storage = new (std::nothrow) ensitlm::data_t [size/sizeof(ensitlm::data_t)];
 	if (storage == NULL)
 	{
 		SC_REPORT_ERROR("SYSTEM", "Error allocating memory");
@@ -28,10 +28,14 @@ tlm::tlm_response_status
 			<< std::hex << FG_YELLOW << " \t@" << a << FG_DEFAULT
 			<< std::dec << " \t(" << FG_YELLOW  << a << FG_DEFAULT << ")"
 			<< endl;
-	
-	storage[a/sizeof(ensitlm::data_t)] = d;
-	
-	return tlm::TLM_OK_RESPONSE;
+
+	if (a < size)
+	{
+		storage[a/sizeof(ensitlm::data_t)] = d;
+		return tlm::TLM_OK_RESPONSE;
+	} else {
+		return tlm::TLM_ADDRESS_ERROR_RESPONSE;
+	}
 }
 
 tlm::tlm_response_status
@@ -39,11 +43,15 @@ tlm::tlm_response_status
 {
 	cerr	<< FG_GREEN << "[" << name() << "] \t" << FG_DEFAULT
 			<< "Read request"
-			<< FG_DEFAULT << " @" << std::hex << a << FG_DEFAULT
-			<< ": " << std::dec << storage[a/sizeof(ensitlm::data_t)]
+			<< FG_YELLOW << " @" << std::hex << a << FG_DEFAULT
 			<< endl;
+	
+	if (a < size)
+	{
+		d = storage[a/sizeof(ensitlm::data_t)];
+		return tlm::TLM_OK_RESPONSE;
+	} else {
+		return tlm::TLM_ADDRESS_ERROR_RESPONSE;
+	}
 
-	d = storage[a/sizeof(ensitlm::data_t)];
-
-	return tlm::TLM_OK_RESPONSE;
 }
