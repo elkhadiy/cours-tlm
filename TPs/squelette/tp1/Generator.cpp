@@ -49,7 +49,7 @@ void Generator::generate(void)
 		if (status != tlm::TLM_OK_RESPONSE)
 		{
 			cout	<<  FG_RED << "[" << name() << "] \t" << FG_DEFAULT
-					<< "Failed reading " << FG_YELLOW << "@" << addr << FG_DEFAULT
+					<< "Failed reading " << FG_YELLOW << "@" << std::hex << addr << FG_DEFAULT
 					<< endl;
 		} else {
 			cout	<< FG_RED << "[" << name() << "] \t" << FG_DEFAULT

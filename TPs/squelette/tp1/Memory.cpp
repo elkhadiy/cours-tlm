@@ -3,9 +3,8 @@
 #include "defines.h"
 
 Memory::Memory(sc_module_name name, uint32_t size)
-	: sc_module(name)
+	: sc_module(name), size(size)
 {
-	this->size = size;
 	storage = new (std::nothrow) ensitlm::data_t [size/sizeof(ensitlm::data_t)];
 	if (storage == NULL)
 	{
