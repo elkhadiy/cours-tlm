@@ -175,6 +175,13 @@ LCDC::write(const ensitlm::addr_t &a, const ensitlm::data_t &d)
 		if (int_register == 0)
 			display_int.write(false);
 		break;
+	case LCDC_START_REG:
+		if (d)
+		{
+			started = true;
+			start_event.notify();
+		}
+		break;
 	default:
 		cerr << name() << ": Write access outside register range!" << endl;
 		return tlm::TLM_ADDRESS_ERROR_RESPONSE;
