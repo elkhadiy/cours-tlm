@@ -39,6 +39,20 @@ int sc_main(int, char**)
 	bus.map(lcd.target_socket,  LCDC_ADDR_REG , SINGLE_REG);
 	bus.map(lcd.target_socket,  LCDC_START_REG, SINGLE_REG);
 	bus.map(lcd.target_socket,  LCDC_INT_REG  , SINGLE_REG);
+	
+	/*
+		NOTE:
+		On aurait pu remplacer les 3 appels à bus.map pour le banc
+		de registres du lcdc par un seul appel avec size=0x3.
+		Je préfère cependant expliciter les trois appels pour
+		montrer que ce module n'expose que ces trois registres sur
+		le bus.
+		Une autre méthode propre de faire ceci serait de définir
+		dans defines LCDC_ADDR_RANGE 0x3.
+		D'ailleur cette méthode serait préférable dans le cas où on
+		aurait plus de 5 registres de configuration.
+	*/
+	//bus.map(lcd.target_socket, LCDC_ADDR_BASE, LCDC_ADDR_RANGE);
 
 	// Starting simulation
 	sc_start(); return 0;

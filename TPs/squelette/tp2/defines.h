@@ -6,6 +6,8 @@
 #define MEM_BASE 0x10000000
 #define MEM_SIZE 0x15400
 
+#define LCDC_ADDR_BASE  0x0
+#define LCDC_ADDR_RANGE 0x3
 #define LCD_FREQ 1.0 / 25
 
 #define FG_RED     "\033[31m"
