@@ -3,7 +3,6 @@
 //     2007 Matthieu Moy
 
 #include "LCDC.h"
-#include "LCDC_registermap.h"
 #include "ensitlm.h"
 #include "defines.h"
 
