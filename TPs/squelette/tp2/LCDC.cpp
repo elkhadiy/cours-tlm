@@ -5,6 +5,7 @@
 #include "LCDC.h"
 #include "LCDC_registermap.h"
 #include "ensitlm.h"
+#include "defines.h"
 
 using namespace std;
 using namespace sc_core;
@@ -38,7 +39,7 @@ LCDC::LCDC(sc_module_name name, const sc_time & display_period)
 
 	if (display == NULL)
 	{
-		cerr << "Failed to open Display!" << endl;
+		cerr << FG_RED << "Failed to open Display!" << FG_DEFAULT << endl;
 		sc_stop();
 	}
 
@@ -152,10 +153,9 @@ LCDC::read(const ensitlm::addr_t &a, ensitlm::data_t &d)
 	case LCDC_INT_REG:
 		d = int_register;
 		break;
-	default:
-		cerr << name()
-		     << ": Read access outside register range!"
-		     << endl;
+	default:	
+		cerr	<< FG_RED << "[" << name() << "]\t" << FG_DEFAULT
+				<< "Read access outside register range!" << endl;
 		return tlm::TLM_ADDRESS_ERROR_RESPONSE;
 	}
 	return tlm::TLM_OK_RESPONSE;
@@ -183,7 +183,8 @@ LCDC::write(const ensitlm::addr_t &a, const ensitlm::data_t &d)
 		}
 		break;
 	default:
-		cerr << name() << ": Write access outside register range!" << endl;
+		cerr	<< FG_RED << "[" << name() << "]\t" << FG_DEFAULT
+				<< "Write access outside register range!" << endl;
 		return tlm::TLM_ADDRESS_ERROR_RESPONSE;
 	}
 	return tlm::TLM_OK_RESPONSE;
@@ -193,11 +194,12 @@ LCDC::write(const ensitlm::addr_t &a, const ensitlm::data_t &d)
 void LCDC::compute()
 {
 	while (!started)
-	{
+	{	
 		wait(start_event);
 	}
 
-	cout << name() << ": LCDC starting" << endl;
+	cout << FG_GREEN << "[" << name() << "]\t" << FG_DEFAULT
+		<< "LCDC starting" << endl;
 
 	while (true)
 	{
@@ -208,7 +210,8 @@ void LCDC::compute()
 
 		if (int_register == 0)
 		{
-			cout << name() << ": sending display interrupt" << endl;
+			cout << FG_GREEN << "[" << name() << "]\t" << FG_DEFAULT
+				<< "sending display interrupt" << endl;
 			int_register = 1;
 			display_int.write(true);
 		}
@@ -236,7 +239,8 @@ void LCDC::fill_buffer()
 
 			if (status != tlm::TLM_OK_RESPONSE)
 			{
-				cerr << name() << ": error while reading memory (address: 0x" << hex << a << ")" << endl;
+				cerr	<< FG_RED << "[" << name() << "]\t" << FG_DEFAULT
+						<< "error while reading memory (address: 0x" << hex << a << ")" << endl;
 			}
 			else
 			{
