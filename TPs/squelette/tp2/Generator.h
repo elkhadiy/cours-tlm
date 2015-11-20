@@ -20,7 +20,7 @@ private:
     inline void init_vram_from_rom(void);
 	inline void start_lcdc(void);
 	inline void init_lcdc(void);
-	//inline void scroll_vram(void);
+	inline void scroll_vram(void);
 };
 
 #endif

@@ -46,7 +46,7 @@ void Generator::irq_handler(void)
 	irq_event.notify();
 }
 
-/*
+
 inline void Generator::scroll_vram(void)
 {
 	tlm::tlm_response_status status;
@@ -54,9 +54,34 @@ inline void Generator::scroll_vram(void)
 	ensitlm::addr_t addr;
 
 	ensitlm::data_t line_buf[MEM_VBUF_WIDTH/4] = {0};
-	ensitlm::data_t line2scroll[MEM_VBUF_WIDTH/4] = {0};
+	for (uint32_t i = 0; i < MEM_VBUF_WIDTH; i += 4) {	
+		addr = MEM_VBUF_BASE+i;
+		status = initiator.read(addr, line_buf[i/4]);
+		if (status != tlm::TLM_OK_RESPONSE) {
+			DBG_ERR("Failed reading from RAM ");
+		}
+	}
+	for (uint32_t i = MEM_VBUF_WIDTH; i < MEM_VBUF_SIZE; i += 4) {
+		addr = MEM_VBUF_BASE+i;
+		uint32_t buf;
+		status = initiator.read(addr, buf);
+		if (status != tlm::TLM_OK_RESPONSE) {
+			DBG_ERR("Failed reading from RAM ");
+		}
+		status = initiator.write(addr-MEM_VBUF_WIDTH, buf);
+		if (status != tlm::TLM_OK_RESPONSE) {
+			DBG_ERR("Failed writing to RAM ");
+		}
+	}
+	for (uint32_t i = 0; i < MEM_VBUF_WIDTH; i += 4) {
+		addr = MEM_VBUF_BASE+(MEM_VBUF_HEIGHT-1)*MEM_VBUF_WIDTH+i;
+		status = initiator.write(addr-MEM_VBUF_WIDTH, line_buf[i/4]);
+		if (status != tlm::TLM_OK_RESPONSE) {
+			DBG_ERR("Failed writing to RAM ");
+		}
+	}
 }
-*/
+
 
 inline void Generator::init_vram_from_rom(void)
 {
@@ -161,6 +186,7 @@ void Generator::generate(void)
 		//while(!interrupted) {
 			wait(irq_event);
 		//}
+		scroll_vram();
 		//interrupted = false;
 	}
 }
