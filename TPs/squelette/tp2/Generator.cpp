@@ -19,17 +19,52 @@
 Generator::Generator(sc_module_name name)
 	: sc_module(name)
 {
+	interrupted = false;
+
 	SC_THREAD(generate);
+
+	SC_METHOD(irq_handler);
+	sensitive << irq;
 }
 
-void Generator::generate(void)
+void Generator::irq_handler(void)
+{
+	DBG_OK("Received Interrupt");
+
+	// ack the display_int
+	tlm::tlm_response_status status;
+	ensitlm::data_t val  = 0x0;
+	ensitlm::addr_t addr = LCDC_INT_REG;
+		
+	status = initiator.write(addr, val);
+	if (status != tlm::TLM_OK_RESPONSE) {
+		DBG_ERR("Failed ACK LCDC_INT_REG ");
+	}
+
+	// unlock the thread;
+	//interrupted = true;
+	irq_event.notify();
+}
+
+/*
+inline void Generator::scroll_vram(void)
+{
+	tlm::tlm_response_status status;
+	ensitlm::data_t val ;
+	ensitlm::addr_t addr;
+
+	ensitlm::data_t line_buf[MEM_VBUF_WIDTH/4] = {0};
+	ensitlm::data_t line2scroll[MEM_VBUF_WIDTH/4] = {0};
+}
+*/
+
+inline void Generator::init_vram_from_rom(void)
 {
 	tlm::tlm_response_status status;
 	ensitlm::data_t val ;
 	ensitlm::addr_t addr;
 	
-	// Blanking the video memory
-	DBG_OK("Blanking video memory");
+	DBG_OK("Initializing video memory");
 
 	for (uint32_t i = 0; i < ROM_SIZE; i += 4)
 	{	
@@ -72,9 +107,16 @@ void Generator::generate(void)
 		}
 	}
 		
-	DBG_OK("Finished blanking video memory");
+	DBG_OK("Finished initializing video memory");
 
-	// Setting up the LCDC Controler
+}
+
+inline void Generator::init_lcdc(void)
+{
+	tlm::tlm_response_status status;
+	ensitlm::data_t val ;
+	ensitlm::addr_t addr;
+
 	DBG_OK("Initializing LCDC");
 
 	// Configure the base address of the video memory buffer
@@ -86,8 +128,13 @@ void Generator::generate(void)
 	}
 
 	DBG_OK("Finished initializing LCDC");
+}
 
-	// Starting the LCDC Controller
+inline void Generator::start_lcdc(void)
+{
+	tlm::tlm_response_status status;
+	ensitlm::data_t val ;
+	ensitlm::addr_t addr;
 
 	DBG_OK("Starting LCDC");
 
@@ -99,8 +146,21 @@ void Generator::generate(void)
 	}
 
 	DBG_OK("LCDC started");
+}
+
+void Generator::generate(void)
+{
+	// Initializigin the video memory
+	init_vram_from_rom();
+	// Setting up the LCDC Controller
+	init_lcdc();
+	// Starting the LCDC Controller
+	start_lcdc();
 
 	while(true) {
-		wait(IDLE_PERIOD);
+		//while(!interrupted) {
+			wait(irq_event);
+		//}
+		//interrupted = false;
 	}
 }

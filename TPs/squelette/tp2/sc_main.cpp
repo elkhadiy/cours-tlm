@@ -21,7 +21,7 @@ int sc_main(int, char**)
 	ROM         rom ("ROM"       );
 
 	// Instantiating misc signals
-	sc_signal<bool> sirq;
+	sc_signal<bool, SC_MANY_WRITERS> sirq("IRQ");
 
 	// Binding masters to bus
 	gen1.initiator.bind      (bus.target);
