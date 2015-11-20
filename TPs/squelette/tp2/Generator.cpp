@@ -75,7 +75,7 @@ inline void Generator::scroll_vram(void)
 	}
 	for (uint32_t i = 0; i < MEM_VBUF_WIDTH; i += 4) {
 		addr = MEM_VBUF_BASE+(MEM_VBUF_HEIGHT-1)*MEM_VBUF_WIDTH+i;
-		status = initiator.write(addr-MEM_VBUF_WIDTH, line_buf[i/4]);
+		status = initiator.write(addr, line_buf[i/4]);
 		if (status != tlm::TLM_OK_RESPONSE) {
 			DBG_ERR("Failed writing to RAM ");
 		}

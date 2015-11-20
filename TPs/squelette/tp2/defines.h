@@ -5,8 +5,8 @@
 #define MEM_PDATA_SIZE  10*1024 // 10 Kio
 #define MEM_VBUF_BASE   MEM_BASE+MEM_PDATA_SIZE
 #define MEM_VBUF_SIZE   320*240 // 1o par pixel
-#define MEM_VBUF_HEIGHT 320
-#define MEM_VBUF_WIDTH  240
+#define MEM_VBUF_HEIGHT 240
+#define MEM_VBUF_WIDTH  320
 #define MEM_SIZE        0x15400
 
 #define ROM_BASE MEM_BASE+MEM_SIZE
