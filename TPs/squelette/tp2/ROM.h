@@ -3,7 +3,8 @@
 
 #include "ensitlm.h"
 
-struct ROM : public sc_core::sc_module {
+struct ROM : public sc_core::sc_module
+{
 	ensitlm::target_socket<ROM> socket;
 	ensitlm::data_t * content;
 
@@ -11,7 +12,8 @@ struct ROM : public sc_core::sc_module {
 	read (const ensitlm::addr_t &a,	      ensitlm::data_t &d);
 
 	tlm::tlm_response_status
-	write(const ensitlm::addr_t &a, const ensitlm::data_t &d) {(void)a; (void)d; abort();};
+	write(const ensitlm::addr_t &a, const ensitlm::data_t &d)
+	{(void)a; (void)d; abort();};
 
 	SC_CTOR(ROM);
 	~ROM();

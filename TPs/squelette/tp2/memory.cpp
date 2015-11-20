@@ -22,14 +22,16 @@ tlm::tlm_response_status Memory::read(ensitlm::addr_t a, ensitlm::data_t& d)
 	// Check if the address is within memory bounds
 	if (a >= m_size)
 	{
-		std::cerr << name() << ": Read access outside memory range! (" << a << ")" << std::endl;
+		std::cerr << name() << ": Read access outside memory range! ("
+			  << a << ")" << std::endl;
 		return tlm::TLM_ADDRESS_ERROR_RESPONSE;
 	}
 	else
 	{
 		d = storage[a/sizeof(ensitlm::data_t)];
 #ifdef DEBUG
-		std::cout << name() << ": Read	access at 0x" << hex << a << " (Data: 0x" << d << ")" << std::endl;
+		std::cout << name() << ": Read	access at 0x" << hex << a
+			  << " (Data: 0x" << d << ")" << std::endl;
 #endif
 		return tlm::TLM_OK_RESPONSE;
 	}
@@ -41,13 +43,15 @@ tlm::tlm_response_status Memory::write(ensitlm::addr_t a, ensitlm::data_t d)
 	// Check if the address is within memory bounds
 	if (a >= m_size)
 	{
-		std::cerr << name() << ": Write access outside memory range! (" << a << ")" << std::endl;
+		std::cerr << name() << ": Write access outside memory range! ("
+			  << a << ")" << std::endl;
 		return tlm::TLM_ADDRESS_ERROR_RESPONSE;
 	}
 	else
 	{
 #ifdef DEBUG
-		std::cout << name() << ": Write access at 0x" << hex << a << " (Data: 0x" << d << ")" << std::endl;
+		std::cout << name() << ": Write access at 0x" << hex << a
+			  << " (Data: 0x" << d << ")" << std::endl;
 #endif
 		storage[a/sizeof(ensitlm::data_t)] = d;
 		return tlm::TLM_OK_RESPONSE;

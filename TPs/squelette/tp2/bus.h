@@ -19,7 +19,9 @@ SC_MODULE(Bus) {
 	tlm::tlm_response_status
 		write(ensitlm::addr_t a, ensitlm::data_t d);
 
-	void map(ensitlm::compatible_socket& port, ensitlm::addr_t start_addr, ensitlm::addr_t size);
+	void map(ensitlm::compatible_socket& port,
+			ensitlm::addr_t start_addr,
+			ensitlm::addr_t size);
 
 private:
 
@@ -38,7 +40,9 @@ private:
 		}
 	};
 
-	typedef std::multimap<ensitlm::compatible_socket*, addr_range> port_map_t;
+	typedef
+		std::multimap<ensitlm::compatible_socket*, addr_range>
+		port_map_t;
 	port_map_t port_map;
 
 	typedef std::map<addr_range, int> addr_map_t;

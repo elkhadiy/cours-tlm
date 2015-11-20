@@ -4,7 +4,9 @@
 Bus::Bus(sc_core::sc_module_name name) : sc_core::sc_module(name)
 {}
 
-void Bus::map(ensitlm::compatible_socket& port, ensitlm::addr_t start_addr, ensitlm::addr_t size) {
+void Bus::map(ensitlm::compatible_socket& port,
+		ensitlm::addr_t start_addr,
+		ensitlm::addr_t size) {
 	port_map.insert(std::pair<ensitlm::compatible_socket*, addr_range>
 			(&port, addr_range(start_addr, start_addr + size - 1)));
 }
@@ -26,7 +28,8 @@ void Bus::end_of_elaboration() {
 		// if no port map corresponds
 		if(it.first == it.second) {
 			std::cerr << name()
-				  << ": no address map information available for target "
+				  << ": no address map information"
+				  << "available for target "
 				  << target->name() << "\n";
 			abort();
 		}
@@ -39,10 +42,12 @@ void Bus::end_of_elaboration() {
 					(*addr_map.find((*j).second));
 				int k = map_entry_bis.second;
 				ensitlm::compatible_socket* target_bis =
-					dynamic_cast<ensitlm::compatible_socket*>(initiator[k]);
+			dynamic_cast<ensitlm::compatible_socket*>(initiator[k]);
 				std::cerr << name()
 					  << ": address map conflict between target ports "
-					  << target->name() << " and " << target_bis->name() << "\n";
+					  << target->name()
+					  << " and "
+					  << target_bis->name() << "\n";
 				abort();
 			}
 		}
@@ -54,7 +59,9 @@ void Bus::end_of_elaboration() {
 
 void Bus::print_addr_map() {
 	// iterate through port maps
-	for(addr_map_t::iterator i = addr_map.begin(); i != addr_map.end(); ++i) {
+	for(addr_map_t::iterator i = addr_map.begin();
+		i != addr_map.end();
+		++i) {
 		std::cout << name() << ": range [" << std::hex
 			  << (*i).first.begin << "-" << (*i).first.end + 1
 			  << "[ is mapped to target '"

@@ -38,7 +38,8 @@ LCDC::LCDC(sc_module_name name, const sc_time & display_period)
 
 	if (display == NULL)
 	{
-		cerr << FG_RED << "Failed to open Display!" << FG_DEFAULT << endl;
+		cerr << FG_RED << "Failed to open Display!" << FG_DEFAULT
+		     << endl;
 		sc_stop();
 	}
 
@@ -47,7 +48,9 @@ LCDC::LCDC(sc_module_name name, const sc_time & display_period)
 	visual	= DefaultVisual(display, screen);
 	cmap	= DefaultColormap(display, screen);
 	rootwin = RootWindow(display, screen);
-	window	= XCreateSimpleWindow(display, rootwin, 10, 10, width, height, 5, BlackPixel(display, screen), BlackPixel(display, screen));
+	window	= XCreateSimpleWindow(display, rootwin, 10, 10, width, height,
+					5, BlackPixel(display, screen),
+					BlackPixel(display, screen));
 
 	size_hints.flags = PSize | PMinSize | PMaxSize;
 	size_hints.min_width  = width;
@@ -61,14 +64,16 @@ LCDC::LCDC(sc_module_name name, const sc_time & display_period)
 
 	gc = XCreateGC(display, window, valuemask, &values);
 
-	XSetStandardProperties(display, window, name, name, None, 0, 0, &size_hints);
+	XSetStandardProperties(display, window, name, name,
+				None, 0, 0, &size_hints);
 
 	XSelectInput(display, window, ButtonPressMask | KeyPressMask);
 	XMapWindow(display, window);
 
 	buffer = 0;
 
-	image = XCreateImage(display, visual, depth, ZPixmap, 0, buffer, width, height, 8, 0);
+	image = XCreateImage(display, visual, depth, ZPixmap,
+				0, buffer, width, height, 8, 0);
 	{
 		// tricks to have it working in non 8-bit depth
 		int imgsize = image->height * image->bytes_per_line;
@@ -152,9 +157,9 @@ LCDC::read(const ensitlm::addr_t &a, ensitlm::data_t &d)
 	case LCDC_INT_REG:
 		d = int_register;
 		break;
-	default:	
-		cerr	<< FG_RED << "[" << name() << "]\t" << FG_DEFAULT
-				<< "Read access outside register range!" << endl;
+	default:
+		cerr << FG_RED << "[" << name() << "]\t" << FG_DEFAULT
+		     << "Read access outside register range!" << endl;
 		return tlm::TLM_ADDRESS_ERROR_RESPONSE;
 	}
 	return tlm::TLM_OK_RESPONSE;
@@ -183,7 +188,7 @@ LCDC::write(const ensitlm::addr_t &a, const ensitlm::data_t &d)
 		break;
 	default:
 		cerr	<< FG_RED << "[" << name() << "]\t" << FG_DEFAULT
-				<< "Write access outside register range!" << endl;
+			<< "Write access outside register range!" << endl;
 		return tlm::TLM_ADDRESS_ERROR_RESPONSE;
 	}
 	return tlm::TLM_OK_RESPONSE;
@@ -192,23 +197,20 @@ LCDC::write(const ensitlm::addr_t &a, const ensitlm::data_t &d)
 // main thread
 void LCDC::compute()
 {
-	while (!started)
-	{	
+	while (!started) {
 		wait(start_event);
 	}
 
 	cout << FG_GREEN << "[" << name() << "]\t" << FG_DEFAULT
 		<< "LCDC starting" << endl;
 
-	while (true)
-	{
+	while (true) {
 		wait(period);
 
 		fill_buffer();
 		draw();
 
-		if (int_register == 0)
-		{
+		if (int_register == 0) {
 			cout << FG_GREEN << "[" << name() << "]\t" << FG_DEFAULT
 				<< "sending display interrupt" << endl;
 			int_register = 1;
@@ -238,8 +240,11 @@ void LCDC::fill_buffer()
 
 			if (status != tlm::TLM_OK_RESPONSE)
 			{
-				cerr	<< FG_RED << "[" << name() << "]\t" << FG_DEFAULT
-						<< "error while reading memory (address: 0x" << hex << a << ")" << endl;
+				cerr << FG_RED << "[" << name() << "]\t"
+				     << FG_DEFAULT
+				     << "error while reading "
+                                     << "memory (address: 0x" << hex << a << ")"
+				     << endl;
 			}
 			else
 			{
@@ -253,10 +258,14 @@ void LCDC::fill_buffer()
 				sourcevalues[3] = (d & 0x000000FF);
 
 				// blit the pixels in the buffer
-				XPutPixel(image, x*4	, y, color_table[sourcevalues[0]]);
-				XPutPixel(image, x*4 + 1, y, color_table[sourcevalues[1]]);
-				XPutPixel(image, x*4 + 2, y, color_table[sourcevalues[2]]);
-				XPutPixel(image, x*4 + 3, y, color_table[sourcevalues[3]]);
+				XPutPixel(image, x*4	, y,
+						color_table[sourcevalues[0]]);
+				XPutPixel(image, x*4 + 1, y,
+						color_table[sourcevalues[1]]);
+				XPutPixel(image, x*4 + 2, y,
+						color_table[sourcevalues[2]]);
+				XPutPixel(image, x*4 + 3, y,
+						color_table[sourcevalues[3]]);
 			}
 
 			a += 4;

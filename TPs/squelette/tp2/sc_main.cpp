@@ -8,38 +8,38 @@
 #include "LCDC.h"
 #include "ROM.h"
 
-// System global configuration
+// System-wide configuration
 #include "defines.h"
 
 int sc_main(int, char**)
 {
 	// Instantiating modules
-	Generator	gen1("Generator1");
-	Bus			bus ("Bus"       );
-	Memory		mem ("Memory", MEM_SIZE                 );
-	LCDC		lcd ("LCD"   , sc_time(LCD_FREQ, SC_SEC));
-	ROM         rom ("ROM"       );
+	Generator gen1("Generator1");
+	Bus       bus ("Bus"       );
+	ROM       rom ("ROM"       );
+	Memory    mem ("Memory", MEM_SIZE                 );
+	LCDC      lcd ("LCD"   , sc_time(LCD_FREQ, SC_SEC));
 
 	// Instantiating misc signals
 	sc_signal<bool, SC_MANY_WRITERS> sirq("IRQ");
 
 	// Binding masters to bus
-	gen1.initiator.bind      (bus.target);
+	gen1.initiator.bind(bus.target);
 	lcd.initiator_socket.bind(bus.target);
 
 	// Biding slaves to bus
-	bus.initiator.bind(mem.target       );
+	bus.initiator.bind(mem.target);
 	bus.initiator.bind(lcd.target_socket);
 	bus.initiator.bind(rom.socket);
-	
+
 	// Binding direct signals
-	gen1.irq.bind       (sirq);
+	gen1.irq.bind(sirq);
 	lcd.display_int.bind(sirq);
 
 	// Building bus memory map
-	bus.map(mem.target       , MEM_BASE      , MEM_SIZE       );
+	bus.map(mem.target, MEM_BASE, MEM_SIZE);
 	bus.map(lcd.target_socket, LCDC_ADDR_BASE, LCDC_ADDR_RANGE);
-	bus.map(rom.socket       , ROM_BASE      , ROM_SIZE       );
+	bus.map(rom.socket, ROM_BASE, ROM_SIZE);
 
 	// Starting simulation
 	sc_start(); return 0;
