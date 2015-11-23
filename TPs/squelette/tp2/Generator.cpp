@@ -5,6 +5,7 @@
 #include "defines.h"
 
 // Debug macros
+// Needs a defined addr and val in scope
 #define DBG_ERR(str) cerr << FG_RED << "[" << name() << "]\t" << FG_DEFAULT \
 			  << str \
 			  << std::hex \
@@ -30,7 +31,8 @@ void Generator::irq_handler(void)
 {
 	DBG_OK("Received Interrupt");
 
-	// Ackowledge the display_int
+	// Ackowledge the display_int interrupt
+	// By setting INT_REG to 0
 	tlm::tlm_response_status status;
 	ensitlm::data_t val  = 0x0;
 	ensitlm::addr_t addr = LCDC_INT_REG;
@@ -73,7 +75,7 @@ inline void Generator::scroll_vram(void)
 			DBG_ERR("Failed writing to RAM ");
 		}
 	}
-	// Paste the saved line
+	// Paste the saved line at the last line of pixels on the screen
 	for(uint32_t i = 0; i < MEM_VBUF_WIDTH; i += 4) {
 		addr = MEM_VBUF_BASE+(MEM_VBUF_HEIGHT-1)*MEM_VBUF_WIDTH+i;
 		status = initiator.write(addr, line_buf[i/4]);
@@ -92,8 +94,9 @@ inline void Generator::init_vram_from_rom(void)
 
 	DBG_OK("Initializing video memory");
 
+	// for each 32bit word in ROM memory...
 	for(uint32_t i = 0; i < ROM_SIZE; i += 4) {
-		// lecture des 8 premiers pixels depuis la ROM
+		// ..read the 8 pixels' data contained in it (8*4bits=32bits)..
 		addr = ROM_BASE+i;
 		status = initiator.read(addr, val);
 		if(status != tlm::TLM_OK_RESPONSE) {
@@ -101,6 +104,7 @@ inline void Generator::init_vram_from_rom(void)
 		}
 
 		uint32_t mask = 0xF;
+		// ..store them in an array for easier management later on..
 		uint8_t pixel[8] = {0};
 
 		for(int8_t j = 7; j >= 0; j--) {
@@ -109,6 +113,14 @@ inline void Generator::init_vram_from_rom(void)
 			val = val >> 4;
 		}
 
+		// ..now pad them with 4 x 0bits to form the two words we push
+		// onto the VRAM
+		// to sum up :
+		// we had in ROM : p0-p1-p2-p3-p4-p5-p6-p7 as one 32bit word
+		// we convert that into :
+		//  hi:   p0-0000-p1-0000-p2-0000-p3-0000
+		//  lo:   p4-0000-p5-0000-p6-0000-p7-0000
+		//                        as two 32bit words in VRAM
 		uint32_t hi = ((uint32_t)pixel[0] << 24)
 			    | ((uint32_t)pixel[1] << 16)
 			    | ((uint32_t)pixel[2] << 8)
@@ -175,17 +187,12 @@ inline void Generator::start_lcdc(void)
 
 void Generator::generate(void)
 {
-	// Initializiging the video memory
 	init_vram_from_rom();
-	// Setting up the LCDC Controller
 	init_lcdc();
-	// Starting the LCDC Controller
 	start_lcdc();
 
 	while(true) {
-		// attente du signal
 		wait(irq_event);
-		// scroll the screen buffer
 		scroll_vram();
 	}
 }
