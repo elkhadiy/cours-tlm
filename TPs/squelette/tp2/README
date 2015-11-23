@@ -1,0 +1,37 @@
+@author Yassine El Khadiri
+
+Modules contained in this project :
+
+* Generator: Generates traffic on the bus to test the other modules.
+	    In this project it copies data from memory to memory
+    Files:
+	Generator.h
+	Generator.cpp
+
+* Bus: Handles communication between modules
+    Files:
+	bus.h
+	bus.cpp
+
+* LCDC: display module that shows the content of a given address range
+    Files:
+	LCDC.h
+	LCDC.cpp
+	LCDC_registermap.h (unused, see defines.h)
+
+* memory: storage module for the embedded software and video memory
+    Files:
+	memory.h
+	memory.cpp
+
+* ROM: storage module containing a picture
+    Files:
+	ROM.h
+	ROM.cpp
+	ROM_content.h
+
+* sc_main.cpp: This is where the modules are put and connected together
+
+* defines.h: This is where system-wide configuration is set.
+		(address ranges, memory sizes and miscellaneous convenient
+		    defines...)
