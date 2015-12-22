@@ -11,9 +11,11 @@ HOST_LD = ld
 HOST_OBJDUMP = objdump
 HOST_READELF = readelf
 
+LDSCRIPT = ldscript
+
 INCLUDE = -I. -I../..
 
-OBJS = main.o boot.o it.o
+OBJS = main.o it.o boot.o
 EXEC = a.out
 
 # Disassembly of the generated executable.
@@ -25,20 +27,22 @@ sections.txt: $(EXEC)
 	$(TARGET_READELF) -S $< > $@
 
 
-$(EXEC): # dependencies
-	echo "Rule for linking not implemented."; exit 1
-# (use $(TARGET_LD), and use the -T option to point to linker script ldscript)
+$(EXEC): $(OBJS)
+	@echo -e "\e[0;32m[MAKEFILE]\e[0m making \e[0;33m$@\e[0m"
+	$(TARGET_LD) -T $(LDSCRIPT) $^
 
-main.o: # dependencies
-	echo "Rule for compilation not implemented"; exit 1
-# (compile with target C compiler)
+-include $(OBJS:.o=.d)
 
+main.o: ../main.c hal.h
+	@echo -e "\e[0;32m[MAKEFILE]\e[0m making \e[0;33m$@\e[0m"
+	$(TARGET_CC) -c $^ $(INCLUDE)
+	$(HOST_CC) -MM ../$*.c $(INCLUDE) > $*.d 
 %.o: %.s
-	echo "Rule for assembly not implemented"; exit 1
+	$(TARGET_CC) -c $<
 
 .PHONY: clean realclean
 clean:
-	-$(RM) $(OBJS) $(EXEC) dump.txt
+	-$(RM) $(OBJS) $(EXEC) dump.txt *.d
 
 realclean: clean
 	-$(RM) *~
