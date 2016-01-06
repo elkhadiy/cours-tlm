@@ -18,6 +18,14 @@ INCLUDE = -I. -I../..
 OBJS = main.o it.o boot.o
 EXEC = a.out
 
+BLUE="\e[0;34m"
+YELLOW="\e[0;33m"
+GREEN="\e[0;32m"
+RED="\e[0;31m"
+COFF="\e[0m"
+PRINT = @/bin/echo -e $(GREEN)"[MAKEFILE] "$(COFF)"Building" $(BLUE)$<$(COFF)
+RESET = @/bin/echo -e $(COFF)
+
 # Disassembly of the generated executable.
 dump.txt: $(EXEC)
 	$(TARGET_OBJDUMP) -d $< > $@
@@ -28,14 +36,18 @@ sections.txt: $(EXEC)
 
 
 $(EXEC): $(OBJS)
-	@echo -e "\e[0;32m[MAKEFILE]\e[0m making \e[0;33m$@\e[0m"
+	$(PRINT)
 	$(TARGET_LD) -T $(LDSCRIPT) $^
 
 -include $(OBJS:.o=.d)
 
+ECHORED=`echo -e '\e[0;31m'`
+ECHOOFF=`echo -e '\e[0m'`
+
 main.o: ../main.c hal.h
-	@echo -e "\e[0;32m[MAKEFILE]\e[0m making \e[0;33m$@\e[0m"
-	$(TARGET_CC) -c $^ $(INCLUDE)
+	$(PRINT)
+	@echo "$(TARGET_CC) -c $^ $(INCLUDE)" | sed -e 's/^/\x1b[44;37m/' | sed -e 's/$$/\x1b[0m/'
+	@$(TARGET_CC) -c $^ $(INCLUDE)
 	$(HOST_CC) -MM ../$*.c $(INCLUDE) > $*.d 
 %.o: %.s
 	$(TARGET_CC) -c $<
