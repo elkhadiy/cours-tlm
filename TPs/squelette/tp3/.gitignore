@@ -1,4 +1,3 @@
-.*.gch
-.*.out
-.*.dump.txt
-.*.sections.txt
+*.gch
+*.a
+*.out
