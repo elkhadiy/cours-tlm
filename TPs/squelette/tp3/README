@@ -43,3 +43,13 @@ PPDIR = @echo $(1) | sed -e 's/^/\x1b[90m/' | sed -e 's/$$/\x1b[0m/'
 		                       and WRITE_WORD
 		- native-wrapper/native_wrapper.cpp : added interrupt handling code
 		                       and implementation for memory access functions
+
+Simulation Results:
+	Without any suprise the native implementation is quicker than the iss one
+as native implementations tend to be pretty losely timed. Test runs show that
+the difference between timer interrupts of the two platforms respectively
+grows linearlly (see difference.pdf).
+	The data of two sample runs respectively on the iss and the native wrapper
+is in the files : iss_samples and native_samples. The R script (results.R)
+makes use of the samples to see the difference between them.
+
