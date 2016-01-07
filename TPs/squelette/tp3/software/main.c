@@ -217,8 +217,10 @@ int __start() {
 			if (TEST_BIT(d, GPIO_BTN0)) {
 				break;
 			}
+
+			// put cpu in a lower consumption state while waiting for an int
 			wait_for_irq();
-			cpu_relax();
+			//cpu_relax();
 		}
 	}
 
