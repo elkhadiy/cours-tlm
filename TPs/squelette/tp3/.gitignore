@@ -1,3 +1,5 @@
 *.gch
 *.a
 *.out
+software/cross/dump.txt
+software/cross/sections.txt
