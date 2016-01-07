@@ -23,7 +23,7 @@
 /* TODO : implementer ces primitives pour la compilation croisée */
 #define read_mem(a)     ( *( (volatile uint32_t*) (a) ) )
 #define write_mem(a,d)  ( *( (volatile uint32_t*) (a) ) = (d) )
-#define wait_for_irq()  abort()
+#define wait_for_irq()  while (!irq_received) {/* wait */} irq_received = 0;
 #define cpu_relax()     ( (void) NULL )
 
 /* printf is disabled, for now ... */

@@ -217,6 +217,8 @@ int __start() {
 			if (TEST_BIT(d, GPIO_BTN0)) {
 				break;
 			}
+			wait_for_irq();
+			cpu_relax();
 		}
 	}
 
