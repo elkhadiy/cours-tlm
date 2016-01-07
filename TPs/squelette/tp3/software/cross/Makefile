@@ -23,34 +23,43 @@ YELLOW="\e[0;33m"
 GREEN="\e[0;32m"
 RED="\e[0;31m"
 COFF="\e[0m"
-PRINT = @/bin/echo -e $(GREEN)"[MAKEFILE] "$(COFF)"Building" $(BLUE)$<$(COFF)
-RESET = @/bin/echo -e $(COFF)
+PRINT = @/bin/echo -e $(GREEN)"[MAKEFILE] "$(COFF)"Building" $(BLUE)$@$(COFF)
+
+# TODO use define and eval so as to only write directive once
+# PrettyPrintDIRective
+PPDIR = @echo $(1) | sed -e 's/^/\x1b[90m/' | sed -e 's/$$/\x1b[0m/'
 
 # Disassembly of the generated executable.
 dump.txt: $(EXEC)
-	$(TARGET_OBJDUMP) -d $< > $@
+	$(PRINT)
+	$(call PPDIR,"$(TARGET_OBJDUMP) -d $< > $@")
+	@$(TARGET_OBJDUMP) -d $< > $@
 
 # Summary of the sections and their size.
 sections.txt: $(EXEC)
-	$(TARGET_READELF) -S $< > $@
+	$(PRINT)
+	$(call PPDIR,"$(TARGET_READELF) -S $< > $@")
+	@$(TARGET_READELF) -S $< > $@
 
 
 $(EXEC): $(OBJS)
 	$(PRINT)
-	$(TARGET_LD) -T $(LDSCRIPT) $^
+	$(call PPDIR,"$(TARGET_LD) -T $(LDSCRIPT) $^")
+	@$(TARGET_LD) -T $(LDSCRIPT) $^
 
 -include $(OBJS:.o=.d)
 
-ECHORED=`echo -e '\e[0;31m'`
-ECHOOFF=`echo -e '\e[0m'`
-
 main.o: ../main.c hal.h
 	$(PRINT)
-	@echo "$(TARGET_CC) -c $^ $(INCLUDE)" | sed -e 's/^/\x1b[44;37m/' | sed -e 's/$$/\x1b[0m/'
+	$(call PPDIR,"$(TARGET_CC) -c $^ $(INCLUDE)")
 	@$(TARGET_CC) -c $^ $(INCLUDE)
-	$(HOST_CC) -MM ../$*.c $(INCLUDE) > $*.d 
+	$(call PPDIR,"$(HOST_CC) -MM ../$*.c $(INCLUDE) > $*.d")
+	@$(HOST_CC) -MM ../$*.c $(INCLUDE) > $*.d
+
 %.o: %.s
-	$(TARGET_CC) -c $<
+	$(PRINT)
+	$(call PPDIR,"$(TARGET_CC) -c $<")
+	@$(TARGET_CC) -c $<
 
 .PHONY: clean realclean
 clean:
