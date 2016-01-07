@@ -1,0 +1,45 @@
+Yassine El Khadiri <yassine.el-khadiri@grenoble-inp.org>
+
+Brief summary of the work done on this project
+==============================================
+
+Files modified :
+
+	* Makefiles : I tried to make them have a prettier output, so I modified
+	              nearly all the makefiles I found in the project (even the
+	              .common one which I included in the archive :
+	              Makefile.common.sample) basically what I did was add these
+	              macros and modified the directives to use them.
+
+################################################################################
+# Pretty Print Makefile Directives (WIP) <yassine.el-khadiri@grenoble-inp.org> #
+################################################################################
+BLUE="\e[0;34m"
+YELLOW="\e[0;33m"
+GREEN="\e[0;32m"
+RED="\e[0;31m"
+COFF="\e[0m"
+PRINT = @/bin/echo -e $(GREEN)"[MAKEFILE] "$(COFF)"Building" $(BLUE)$@$(COFF)
+# TODO use define and eval so as to only write directive once
+PPDIR = @echo $(1) | sed -e 's/^/\x1b[90m/' | sed -e 's/$$/\x1b[0m/'
+################################################################################
+
+		- software/cross/Makefile    : add dependencies, rules and color
+		- software/native/Makefile   : add dependencies, rules and color
+		- iss/Makefile               : add color
+		- native_wrapper/Makefile    : add color
+		- Makefile.common.sample     : add color (replace ../../Makefile.common
+												                to take effect)
+
+	* Source files :
+		- software/main.c : uncommented draw_gun, and added wait_for_irq
+		- software/cross/hal.h : added implementation of {read,write}_mem
+		                         wait_for_irq and a simple printf over uart
+		- software/cross/ldscript : set stack top to 0x201FFFFC
+		- iss/sc_main_iss.cpp : hooked up the uart on the platform
+		- iss/mb_wrapper.h : added declaration for interrupt handling code
+		- iss/mb_wrapper.cpp : added interrupt handling code and missing
+		                       implementation for fetch, READ_{BYTE,WORD}
+		                       and WRITE_WORD
+		- native-wrapper/native_wrapper.cpp : added interrupt handling code
+		                       and implementation for memory access functions
