@@ -19,7 +19,6 @@ SECTIONS
                 *(.bss)
                 _BssEnd = . ;
         } > bram
-   /* TODO: find suitable address for stack, this one won't work */
    /* stack top will be at the bottom of the SRAM i.e.           */
    /* 0x20100000 + 0x00100000 - 0x1 = 0x201FFFFF                 */
 _stack_top  = 0x201FFFFC;

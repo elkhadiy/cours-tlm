@@ -20,13 +20,13 @@
 /* Dummy implementation of abort(): dereference a NULL pointer */
 #define abort() ((*(int *)NULL) = 0)
 
-/* TODO : implementer ces primitives pour la compilation croisée */
+/* primitives used for cross compilation */
 #define read_mem(a)     ( *( (volatile uint32_t*) (a) ) )
 #define write_mem(a,d)  ( *( (volatile uint32_t*) (a) ) = (d) )
 #define wait_for_irq()  while (!irq_received) {/* wait */} irq_received = 0;
 #define cpu_relax()     ( (void) NULL )
 
-/* printf is disabled, for now ... */
+/* simple printf implementation */
 #define printf(x) my_printf(x)
 
 void my_printf(const char *c)

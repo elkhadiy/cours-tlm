@@ -20,6 +20,9 @@ struct MBWrapper : sc_core::sc_module {
 	void run_iss(void);
 
 	void int_handler(void);
+
+	// flag for keeping track of interruptions
+	// (see int_handler body and the end of run_iss)
 	bool interrupt;
 
 	SC_CTOR(MBWrapper);
