@@ -171,7 +171,7 @@ int __start() {
 	clr_screen(old_img_addr);
 	clr_screen(new_img_addr);
 
-	// draw_gun(0, 30);
+	draw_gun(0, 30);
 
 	/* blinker */
 	set_pixel(old_img_addr, 20, 10, 1);

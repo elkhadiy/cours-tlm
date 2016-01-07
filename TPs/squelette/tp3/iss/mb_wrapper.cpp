@@ -12,7 +12,12 @@
 /* Time between two step()s */
 static const sc_core::sc_time PERIOD(20, sc_core::SC_NS);
 
+/* number of cycles the Irq flag must be maintained*/
+static const int irq_cycles = 5;
+
 //#define DEBUG
+//#define DEBUG_Read_Byte
+//#define DEBUG_Inst
 //#define INFO
 
 using namespace std;
@@ -23,7 +28,19 @@ MBWrapper::MBWrapper(sc_core::sc_module_name name)
 {
 	m_iss.reset();
 	m_iss.setIrq(false);
+	in_intr = false;
+	pre_in_intr = false;
 	SC_THREAD(run_iss);
+
+	SC_METHOD(int_handler);
+	sensitive << irq.pos();
+	dont_initialize();
+}
+
+void MBWrapper::int_handler(void)
+{
+	m_iss.setIrq(true);
+	in_intr = true;
 }
 
 
@@ -31,21 +48,39 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
                                   uint32_t mem_addr, uint32_t mem_wdata) {
 	uint32_t localbuf;
 	tlm::tlm_response_status status;
+	uint32_t mask = 0xFF000000;
 	switch (mem_type) {
 	case iss_t::READ_WORD: {
 		/* The ISS requested a data read
 		   (mem_addr into localbuf). */
-		abort(); // TODO
+		status = socket.read(mem_addr, localbuf);
+		localbuf = uint32_machine_to_be(localbuf);
 #ifdef DEBUG
 		std::cout << hex << "read    " << setw(10) << localbuf
 		          << " at address " << mem_addr << std::endl;
 #endif
 		m_iss.setDataResponse(0, localbuf);
 	} break;
-	case iss_t::READ_BYTE:
-	case iss_t::WRITE_HALF:
-	case iss_t::WRITE_BYTE:
+	case iss_t::READ_BYTE: {
+		uint32_t byte_idx = mem_addr % 4;
+		uint32_t mem_addr_algn = mem_addr - byte_idx;
+		status = socket.read(mem_addr_algn,
+		                     localbuf);
+		localbuf <<= byte_idx*8;
+		localbuf &= mask;
+		localbuf = uint32_machine_to_be(localbuf);
+#ifdef DEBUG_Read_Byte
+		std::cout << hex << "read_byte    " << setw(10) << localbuf
+		          << " number " << byte_idx
+		          << " at address " << mem_addr
+		          << " aligned on " << mem_addr_algn << std::endl;
+#endif
+		m_iss.setDataResponse(0, localbuf);
+	} break;
+	case iss_t::WRITE_BYTE: {
+	} break;
 	case iss_t::READ_HALF:
+	case iss_t::WRITE_HALF:
 		// Not needed for our platform.
 		std::cerr << "Operation " << mem_type << " unsupported for "
 		          << std::showbase << std::hex << mem_addr << std::endl;
@@ -56,7 +91,8 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 	case iss_t::WRITE_WORD: {
 		/* The ISS requested a data write
 		   (mem_wdata at mem_addr). */
-		abort(); // TODO
+		status = socket.write(mem_addr,
+		                      uint32_be_to_machine(mem_wdata));
 #ifdef DEBUG
 		std::cout << hex << "wrote   " << setw(10) << mem_wdata
 		          << " at address " << mem_addr << std::endl;
@@ -86,8 +122,17 @@ void MBWrapper::run_iss(void) {
 				/* The ISS requested an instruction.
 				 * We have to do the instruction fetch
 				 * by reading from memory. */
-				abort(); // TODO
+				tlm::tlm_response_status status;
 				uint32_t localbuf;
+				status = socket.read(ins_addr,
+				                     localbuf);
+				localbuf = uint32_machine_to_be(localbuf);
+#ifdef DEBUG_Inst
+				std::cout << hex << "inst    "
+				          << setw(10) << localbuf
+				          << " at address "
+				          << ins_addr << std::endl;
+#endif
 				m_iss.setInstruction(0, localbuf);
 			}
 
@@ -103,6 +148,18 @@ void MBWrapper::run_iss(void) {
 				                  mem_wdata);
 			}
 			m_iss.step();
+			if (in_intr) {
+				if (pre_in_intr) {
+					inst_count++;
+					if (inst_count == irq_cycles) {
+						in_intr = false;
+						m_iss.setIrq(false);
+					}
+				} else {
+					inst_count = 0;
+				}
+			}
+			pre_in_intr = in_intr;
 		}
 
 		wait(PERIOD);
