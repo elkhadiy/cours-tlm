@@ -25,6 +25,7 @@ Generator::Generator(sc_module_name name)
 
 	SC_METHOD(irq_handler);
 	sensitive << irq.pos();
+	dont_initialize();
 }
 
 void Generator::irq_handler(void)
