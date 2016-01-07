@@ -33,7 +33,6 @@ void my_printf(const char *c)
 {
 	int i = 0;
 	while (c[i] != '\0') {
-		//*((volatile char*)(UART_BASEADDR + UART_FIFO_WRITE)) = c[i];
 		write_mem(UART_BASEADDR + UART_FIFO_WRITE, c[i]);
 		i++;
 	}

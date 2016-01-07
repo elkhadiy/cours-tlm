@@ -78,7 +78,7 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 		if(status != tlm::TLM_OK_RESPONSE) {
 			DBG_ERR("Failed READ_BYTE ", mem_addr_algn, localbuf);
 		}
-		localbuf <<= byte_idx*8;
+		localbuf <<= byte_idx * 8;
 		localbuf &= mask;
 		localbuf = uint32_machine_to_be(localbuf);
 #ifdef DEBUG_Read_Byte
