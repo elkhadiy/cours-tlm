@@ -20,8 +20,7 @@ struct MBWrapper : sc_core::sc_module {
 	void run_iss(void);
 
 	void int_handler(void);
-	bool in_intr;
-	bool pre_in_intr;
+	bool interrupt;
 
 	SC_CTOR(MBWrapper);
 

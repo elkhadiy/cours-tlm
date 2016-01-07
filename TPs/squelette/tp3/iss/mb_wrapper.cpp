@@ -8,6 +8,13 @@
 #include "microblaze.h"
 #include <iomanip>
 
+// Debug macros
+#define DBG_ERR(str,addr,val) cerr << "[" << name() << "]\t" \
+                                   << str \
+                                   << std::hex \
+                                   << "0x" << val \
+                                   << " @" << addr \
+                                   << std::endl
 
 /* Time between two step()s */
 static const sc_core::sc_time PERIOD(20, sc_core::SC_NS);
@@ -27,9 +34,8 @@ MBWrapper::MBWrapper(sc_core::sc_module_name name)
       m_iss(0) /* identifier, not very useful since we have only one instance */
 {
 	m_iss.reset();
+	interrupt = false;
 	m_iss.setIrq(false);
-	in_intr = false;
-	pre_in_intr = false;
 	SC_THREAD(run_iss);
 
 	SC_METHOD(int_handler);
@@ -39,8 +45,8 @@ MBWrapper::MBWrapper(sc_core::sc_module_name name)
 
 void MBWrapper::int_handler(void)
 {
+	interrupt = true;
 	m_iss.setIrq(true);
-	in_intr = true;
 }
 
 
@@ -54,6 +60,9 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 		/* The ISS requested a data read
 		   (mem_addr into localbuf). */
 		status = socket.read(mem_addr, localbuf);
+		if(status != tlm::TLM_OK_RESPONSE) {
+			DBG_ERR("Failed READ_WORD ", mem_addr, localbuf);
+		}
 		localbuf = uint32_machine_to_be(localbuf);
 #ifdef DEBUG
 		std::cout << hex << "read    " << setw(10) << localbuf
@@ -66,6 +75,9 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 		uint32_t mem_addr_algn = mem_addr - byte_idx;
 		status = socket.read(mem_addr_algn,
 		                     localbuf);
+		if(status != tlm::TLM_OK_RESPONSE) {
+			DBG_ERR("Failed READ_BYTE ", mem_addr_algn, localbuf);
+		}
 		localbuf <<= byte_idx*8;
 		localbuf &= mask;
 		localbuf = uint32_machine_to_be(localbuf);
@@ -77,8 +89,7 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 #endif
 		m_iss.setDataResponse(0, localbuf);
 	} break;
-	case iss_t::WRITE_BYTE: {
-	} break;
+	case iss_t::WRITE_BYTE:
 	case iss_t::READ_HALF:
 	case iss_t::WRITE_HALF:
 		// Not needed for our platform.
@@ -93,6 +104,10 @@ void MBWrapper::exec_data_request(enum iss_t::DataAccessType mem_type,
 		   (mem_wdata at mem_addr). */
 		status = socket.write(mem_addr,
 		                      uint32_be_to_machine(mem_wdata));
+		if(status != tlm::TLM_OK_RESPONSE) {
+			DBG_ERR("Failed WRITE_WORD ", mem_addr,
+			         uint32_machine_to_be(mem_wdata));
+		}
 #ifdef DEBUG
 		std::cout << hex << "wrote   " << setw(10) << mem_wdata
 		          << " at address " << mem_addr << std::endl;
@@ -126,6 +141,10 @@ void MBWrapper::run_iss(void) {
 				uint32_t localbuf;
 				status = socket.read(ins_addr,
 				                     localbuf);
+				if(status != tlm::TLM_OK_RESPONSE) {
+					DBG_ERR("Failed fetch ", ins_addr,
+					        localbuf);
+				}
 				localbuf = uint32_machine_to_be(localbuf);
 #ifdef DEBUG_Inst
 				std::cout << hex << "inst    "
@@ -148,18 +167,15 @@ void MBWrapper::run_iss(void) {
 				                  mem_wdata);
 			}
 			m_iss.step();
-			if (in_intr) {
-				if (pre_in_intr) {
-					inst_count++;
-					if (inst_count == irq_cycles) {
-						in_intr = false;
-						m_iss.setIrq(false);
-					}
-				} else {
+			if (interrupt) {
+				if (inst_count == irq_cycles) {
+					interrupt = false;
 					inst_count = 0;
+					m_iss.setIrq(false);
+				} else {
+					inst_count++;
 				}
 			}
-			pre_in_intr = in_intr;
 		}
 
 		wait(PERIOD);
