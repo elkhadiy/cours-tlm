@@ -34,31 +34,33 @@ PPDIR = @echo $(1) | sed -e 's/^/\x1b[90m/' | sed -e 's/$$/\x1b[0m/'
 		- software/native/Makefile   : add dependencies, rules and color
 		- iss/Makefile               : add color
 		- native_wrapper/Makefile    : add color
-		- Makefile.common.sample     : add color (replace ../../Makefile.common
-												                to take effect)
+		- Makefile.common.sample     : add color
+		                               (replace ../../Makefile.common
+		                                                 to take effect)
 
 	* Source files :
 		- software/main.c : uncommented draw_gun, and added wait_for_irq
-		- software/cross/hal.h : added implementation of {read,write}_mem
-		                         wait_for_irq and a simple printf over uart
+		- software/cross/hal.h : added implementation of
+		     {read,write}_mem wait_for_irq and a simple printf over uart
 		- software/cross/ldscript : set stack top to 0x201FFFFC
 		- iss/sc_main_iss.cpp : hooked up the uart on the platform
-		- iss/mb_wrapper.h : added declaration for interrupt handling code
+		- iss/mb_wrapper.h : added declaration for interrupt handling
+		                     code
 		- iss/mb_wrapper.cpp : added interrupt handling code and missing
-		                       implementation for fetch, READ_{BYTE,WORD}
-		                       and WRITE_WORD
-		- native-wrapper/native_wrapper.cpp : added interrupt handling code
-		                       and implementation for memory access functions
+		                      implementation for fetch, READ_{BYTE,WORD}
+		                      and WRITE_WORD
+		- native-wrapper/native_wrapper.cpp : added interrupt handling
+		             code and implementation for memory access functions
 
 Simulation Results:
 -------------------
 
-	Without any suprise the native implementation is quicker than the iss one
-as native implementations tend to be pretty losely timed. Test runs show that
-the difference between timer interrupts of the two platforms respectively
+	Without any suprise the native implementation is quicker than the iss
+one as native implementations tend to be pretty losely timed. Test runs show
+that the difference between timer interrupts of the two platforms respectively
 grows linearlly (see results/difference.pdf).
-	The data of two sample runs respectively on the iss and the native wrapper
-is in the files : results/iss_samples and results/native_samples.
+	The data of two sample runs respectively on the iss and the native
+wrapper is in the files : results/iss_samples and results/native_samples.
 The R script (results.R) makes use of the samples to see the difference
 between them.
 
